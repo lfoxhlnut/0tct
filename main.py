@@ -168,8 +168,8 @@ async def mock_openapi(user_name: str, session: Session = Depends(get_db)) -> JS
     return ori_dict
 
 
-app.mount("/docs", StaticFiles(directory="statics"))
-
+# app.mount("/docs", StaticFiles(directory="statics/docs"))
+app.mount("/", StaticFiles(directory="statics/"))
 
 
 @app.get("/{user_name}/{path:path}")

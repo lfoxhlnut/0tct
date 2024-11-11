@@ -1,0 +1,26 @@
+body {
+    font-family: Arial, sans-serif;
+}
+
+.form {
+    margin-bottom: 20px;
+}
+
+input {
+    margin-bottom: 10px;
+    padding: 5px;
+}
+
+button {
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+#all-users-list {
+    list-style: none;
+    padding: 0;
+}
+
+#all-users-list li {
+    margin-bottom: 5px;
+}

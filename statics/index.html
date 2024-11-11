@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management System</title>
+    <link rel="stylesheet" href="/index.css">
+</head>
+<body>
+    <h1 id="body-title">Student Management System</h1>
+    <div>
+        <label for="apiBaseUrlInput">后端 api 实现者:</label>
+        <input type="text" id="apiBaseUrlInput" placeholder="Enter your name">
+        <button id="setBaseUrlButton">切换到此 api</button>
+    </div>
+    
+    <div id="login-form" class="form">
+        <h2>Login</h2>
+        <input type="text" id="login-student-name" placeholder="Student Name">
+        <input type="text" id="login-student-id" placeholder="Student ID">
+        <input type="number" id="login-height" placeholder="Height in inches">
+        <input type="text" id="login-phone" placeholder="Phone">
+        <button onclick="loginStudent()">Login</button>
+    </div>
+
+    <div id="logout-form" class="form">
+        <h2>Logout</h2>
+        <input type="text" id="logout-id" placeholder="Student ID">
+        <button onclick="logoutStudent()">Logout</button>
+    </div>
+
+    <div id="update-height-form" class="form">
+        <h2>Update Height</h2>
+        <input type="text" id="update-height-id" placeholder="Student ID">
+        <input type="number" id="update-height-value" placeholder="New Height in inches">
+        <button onclick="updateHeight()">Update Height</button>
+    </div>
+
+    <div id="learning-form" class="form">
+        <h2>Check Learning</h2>
+        <input type="text" id="learning-id" placeholder="Student ID">
+        <button onclick="checkLearning()">Check</button>
+        <p id="learning-result"></p>
+    </div>
+
+    <div id="all-users-form" class="form">
+        <h2>View All Students</h2>
+        <button onclick="getAllUsers()">View</button>
+        <ul id="all-users-list"></ul>
+    </div>
+
+    <div id="average-height-form" class="form">
+        <h2>Average Height</h2>
+        <button onclick="getAverageHeight()">Calculate</button>
+        <p id="average-height-result"></p>
+    </div>
+
+    <script src="/index.js"></script>
+</body>
+</html>
