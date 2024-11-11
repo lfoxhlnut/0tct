@@ -1,6 +1,7 @@
 from typing import Union
 from pydantic import BaseModel
 from fastapi import FastAPI, Request, HTTPException, Depends
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import Response, JSONResponse, HTMLResponse
 from sqlmodel import Session
@@ -17,6 +18,19 @@ from port_forwarding_with_httpx import forward_request
 # 毕竟没有权限验证
 app = FastAPI(docs_url=False, redoc_url=False)
 app = FastAPI() # for test
+
+origins = []
+for i in range(8001, 8101):
+    origins.append(f"https://tutorial.0linetekcenter.tech:{i}")
+    origins.append(f"http://localhost:{i}")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # TODO: 把 port 分离成子路由
 
