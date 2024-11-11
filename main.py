@@ -130,9 +130,27 @@ presets: [
     return HTMLResponse(content=doc_content)
 
 @app.get("/{user_name}/openapi.json")
-async def mock_openapi(user_name: str) -> JSONResponse:
+async def mock_openapi(user_name: str, session: Session = Depends(get_db)) -> JSONResponse:
+    import subprocess   # os 无法获得命令输出
+    import json
+    from fastapi.encoders import jsonable_encoder
+    curl_command = [
+        "curl",
+        "-X", "GET",
+        f"localhost:{await query_port(user_name, session)}/openapi.json",
+        "-H", "accept: application/json",
+    ]
+    ori_json: str = subprocess.check_output(curl_command, text=True)
+    ori_dict: dict = json.loads(ori_json)
     
-    pass
+    new_path: dict = {}  # 直接 = ori_dict 有浅拷贝问题
+    for key, value in ori_dict["paths"].items():
+        new_key: str = f"/{user_name}{key}"
+        new_path[new_key] = value
+        print(f"new path is: {new_key}")
+    ori_dict["paths"] = new_path
+    return ori_dict
+
 
 app.mount("/docs", StaticFiles(directory="statics"))
 
@@ -149,7 +167,7 @@ async def router_forward(user_name: str, path: str, request: Request, session: S
 
 async def forward(user_name: str, path: str, request: Request, session: Session) -> Response:
     try:
-        user_port: int = query_port(user_name=user_name, session=session)
+        user_port: int = await query_port(user_name=user_name, session=session)
     except Exception:
         # 处理略显粗糙, 先这样吧
         raise HTTPException(404, f"User {user_name} not found. Forwarding denied.")
