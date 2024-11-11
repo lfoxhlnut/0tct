@@ -99,20 +99,22 @@ def del_user(user_name: str, session: Session = Depends(get_db)):
 
 @app.get("/{user_name}/docs")
 async def mock_docs(user_name: str) -> HTMLResponse:
+    # 路径如果不以 / 开始, 浏览器会解释为当前路径的相对路径
+    # NOTE: For html like /docs, if the css path is like docs/a.css instead of /docs/a.css, then the browser will request data from domain/docs/docs/a.css
     doc_content: str = f"""<!DOCTYPE html>
 <html>
 <head>
-<link type="text/css" rel="stylesheet" href="docs/swagger-ui.css">
+<link type="text/css" rel="stylesheet" href="/docs/swagger-ui.css">
 <link rel="shortcut icon" href="https://fastapi.tiangolo.com/img/favicon.png">
 <title>{user_name}'s backend document</title>
 </head>
 <body>
 <div id="swagger-ui">
 </div>
-<script src="docs/swagger-ui-bundle.js"></script>
+<script src="/docs/swagger-ui-bundle.js"></script>
 <script>
 const ui = SwaggerUIBundle({{
-    url: '{user_name}/openapi.json',
+    url: '/{user_name}/openapi.json',
 "dom_id": "#swagger-ui",
 "layout": "BaseLayout",
 "deepLinking": true,
