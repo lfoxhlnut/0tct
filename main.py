@@ -4,6 +4,11 @@ from fastapi import FastAPI, Request, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import Response, JSONResponse, HTMLResponse
+# 似乎, 如果用 vscode 创建虚拟环境后问你要不要按照 requirements.txt 安装依赖,
+#  你要是用这个, 他会报一个 sqlmodel 找不到此模块的警告,
+#  但是实际上是成功安装的, 因为可以成功运行,
+#  解决方法是删了虚拟环境自己手动重建安装依赖,重启 vscode
+#  当然不确定是不是因为我修改了一下 requirements.txt 的内容
 from sqlmodel import Session
 from typing import Annotated
 from db import get_db
@@ -100,7 +105,7 @@ def rand_port(session) -> int:
 
 # TODO: 迁移成 crud 里的函数
 @app.delete("/port/del/{user_name}")
-def del_user(user_name: str, session: Session = Depends(get_db)):
+def del_user(user_name: str, session: Session = Depends(get_db)) -> dict:
     user = crud.get_user_by_full_name(session=session, full_name=user_name)
     if not user:
         raise HTTPException(404)
@@ -148,7 +153,7 @@ presets: [
 
 
 @app.get("/{user_name}/openapi.json")
-async def mock_openapi(user_name: str, session: Session = Depends(get_db)) -> JSONResponse:
+async def mock_openapi(user_name: str, session: Session = Depends(get_db)) -> dict:
     import subprocess   # os 无法获得命令输出
     import json
     curl_command = [
@@ -193,7 +198,6 @@ async def forward(user_name: str, path: str, request: Request, session: Session)
         raise HTTPException(404, f"User {user_name} not found. Forwarding denied.")
     host = "https://tutorial.0linetekcenter.tech"
     host = "http://tutorial.localhost"
-    #TODO
     response = await forward_request(host, user_port, "/"+user_name, request)
     return response
     
