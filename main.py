@@ -110,22 +110,23 @@ def del_user(user_name: str, session: Session = Depends(get_db)):
     return {"message":"ok"}
 
 
-
+# 也可以用 jinja2
 @app.get("/{user_name}/docs")
 async def mock_docs(user_name: str) -> HTMLResponse:
     # 路径如果不以 / 开始, 浏览器会解释为当前路径的相对路径
     # NOTE: For html like /docs, if the css path is like docs/a.css instead of /docs/a.css, then the browser will request data from domain/docs/docs/a.css
+    static_prefix: str = "/statics/docs"
     doc_content: str = f"""<!DOCTYPE html>
 <html>
 <head>
-<link type="text/css" rel="stylesheet" href="/docs/swagger-ui.css">
+<link type="text/css" rel="stylesheet" href="{static_prefix}/swagger-ui.css">
 <link rel="shortcut icon" href="https://fastapi.tiangolo.com/img/favicon.png">
 <title>{user_name}'s backend document</title>
 </head>
 <body>
 <div id="swagger-ui">
 </div>
-<script src="/docs/swagger-ui-bundle.js"></script>
+<script src="{static_prefix}/swagger-ui-bundle.js"></script>
 <script>
 const ui = SwaggerUIBundle({{
     url: '/{user_name}/openapi.json',
@@ -145,11 +146,11 @@ presets: [
 </html>"""
     return HTMLResponse(content=doc_content)
 
+
 @app.get("/{user_name}/openapi.json")
 async def mock_openapi(user_name: str, session: Session = Depends(get_db)) -> JSONResponse:
     import subprocess   # os 无法获得命令输出
     import json
-    from fastapi.encoders import jsonable_encoder
     curl_command = [
         "curl",
         "-X", "GET",
@@ -163,19 +164,22 @@ async def mock_openapi(user_name: str, session: Session = Depends(get_db)) -> JS
     for key, value in ori_dict["paths"].items():
         new_key: str = f"/{user_name}{key}"
         new_path[new_key] = value
-        print(f"new path is: {new_key}")
+        # print(f"new path is: {new_key}")
     ori_dict["paths"] = new_path
     return ori_dict
 
 
-# app.mount("/docs", StaticFiles(directory="statics/docs"))
-app.mount("/", StaticFiles(directory="statics/"))
+# 顺序很重要, 否则 /docs/a.css 会匹配 "/{user_name}/{path:path}" 这样的路径
+# 会递归地挂载
+# 必须通过前缀来区分 statics 和 api, 否则 statics 会屏蔽掉 api
+app.mount("/statics", StaticFiles(directory="statics/"))
 
 
 @app.get("/{user_name}/{path:path}")
 @app.post("/{user_name}/{path:path}")
 @app.delete("/{user_name}/{path:path}")
 async def router_forward(user_name: str, path: str, request: Request, session: Session = Depends(get_db)) -> Response:
+    print("in forwarding")
     return await forward(user_name=user_name,path=path, request=request,session=session)
 
 
